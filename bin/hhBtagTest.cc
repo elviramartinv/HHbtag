@@ -1,6 +1,5 @@
+#include <map>
 #include "../interface/HH_BTag.h"
-#include <iostream>
-#include <sstream>
 
 int main(int argc, char *argv[])
 {
@@ -22,7 +21,7 @@ int main(int argc, char *argv[])
         std::vector<float> rel_jet_M_pt;
         std::vector<float> rel_jet_E_pt;
         std::vector<float> jet_htt_deta;
-        std::vector<float> jet_deepFlavour;
+        std::vector<float> jet_btagScore;
         std::vector<float> jet_htt_dphi;
         int sample_year;
         int channelId;
@@ -34,11 +33,11 @@ int main(int argc, char *argv[])
 
         inputVariables() {}
          inputVariables(std::vector<float> _jet_pt, std::vector<float> _jet_eta, std::vector<float> _rel_jet_M_pt,
-         std::vector<float> _rel_jet_E_pt, std::vector<float> _jet_htt_deta, std::vector<float> _jet_deepFlavour,
+         std::vector<float> _rel_jet_E_pt, std::vector<float> _jet_htt_deta, std::vector<float> _jet_btagScore,
          std::vector<float> _jet_htt_dphi, int _sample_year, int _channelId, float _htt_pt, float _htt_eta,
          float _htt_met_dphi, float _rel_met_pt_htt_pt,  float _htt_scalar_pt)
             : jet_pt(_jet_pt), jet_eta(_jet_eta), rel_jet_M_pt(_rel_jet_M_pt), rel_jet_E_pt(_rel_jet_E_pt),
-              jet_htt_deta(_jet_htt_deta), jet_deepFlavour(_jet_deepFlavour), jet_htt_dphi(_jet_htt_dphi),
+              jet_htt_deta(_jet_htt_deta), jet_btagScore(_jet_btagScore), jet_htt_dphi(_jet_htt_dphi),
               sample_year(_sample_year), channelId(_channelId), htt_pt(_htt_pt), htt_eta(_htt_eta),
               htt_met_dphi(_htt_met_dphi), rel_met_pt_htt_pt(_rel_met_pt_htt_pt), htt_scalar_pt(_htt_scalar_pt){}
     };
@@ -66,7 +65,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < static_cast<int>(input_variables.size()); ++i){
         auto scores = test.HH_BTag::GetScore(input_variables.at(i).jet_pt, input_variables.at(i).jet_eta,
                                              input_variables.at(i).rel_jet_M_pt, input_variables.at(i).rel_jet_E_pt,
-                                             input_variables.at(i).jet_htt_deta, input_variables.at(i).jet_deepFlavour,
+                                             input_variables.at(i).jet_htt_deta, input_variables.at(i).jet_btagScore,
                                              input_variables.at(i).jet_htt_dphi, input_variables.at(i).sample_year,
                                              input_variables.at(i).channelId, input_variables.at(i).htt_pt,
                                              input_variables.at(i).htt_eta, input_variables.at(i).htt_met_dphi,
