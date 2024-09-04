@@ -35,7 +35,7 @@ https://twiki.cern.ch/twiki/bin/viewauth/CMS/DoubleHiggsToBBTauTauWorkingLegacyR
 1. rel_jet_M_pt: Relative mass of the b-jet candidate: jet M / jet pT.
 1. rel_jet_E_pt Relative energy of the b-jet candidate: jet E / jet pT.
 1. jet_htt_deta: Eta between the b-jet and the visible 4-momentum of the HTT.
-1. jet_deepFlavour: The score of the b-jet candidate given by the b-tagger.
+1. jet_btagScore: The score of the b-jet candidate given by the b-tagger.
 1. jet_htt_dphi: Phi between the b-jet and the visible 4-momentum of the HTT.
 1. sample_year: Year of the sample : v1 and v2: (2016, 2017 or 2018); v3: (2022, 2023 or 2024)
 1. channelId: v1 and v2: 0 - eTau, 1 - muTau, 2 - tauTau; v3: 0 - muTau, 1 - eTau, 2 - tauTau
