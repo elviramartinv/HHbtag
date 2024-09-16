@@ -13,7 +13,7 @@ HH_BTag::HH_BTag(const std::array<std::string, HH_BTag::n_models>& models)
             } else if (models.at(n).find("v2") != std::string::npos) {
                 nn_descs.at(n).input_layer = "serving_default_input_1:0";
             } else if (models.at(n).find("v3") != std::string::npos) {
-                nn_descs.at(n).input_layer = "serving_default_input_2:0";
+                nn_descs.at(n).input_layer = "serving_default_input_1:0";
             } else {
                 throw std::runtime_error("HH_BTag::HH_BTag: unknown model version");
             }
