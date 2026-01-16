@@ -1,4 +1,8 @@
 #include <map>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <vector>
 #include "../interface/HH_BTag.h"
 
 int main(int argc, char *argv[])
