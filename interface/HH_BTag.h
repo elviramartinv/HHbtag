@@ -1,7 +1,13 @@
 #include <vector>
 #include <string>
-#include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
+#include <memory>
+#include <array>
 
+// Forward-declare to avoid JIT of tensorflow header
+namespace tensorflow {
+    class Session;
+    class MetaGraphDef;
+}
 namespace hh_btag{
 
 namespace InputVars{
