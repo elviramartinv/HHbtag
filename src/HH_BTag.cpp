@@ -6,7 +6,8 @@
 using tensorflow::RewriterConfig;
 namespace hh_btag{
 
-HH_BTag::HH_BTag(const std::array<std::string, HH_BTag::n_models>& models)
+HH_BTag::HH_BTag(const std::array<std::string, HH_BTag::n_models>& models, bool useMetaGraph)
+ : useMetaGraph_(useMetaGraph)
 {
     tensorflow::Options default_options{};
     // Tensorflow optimizations are run everytime tensorflow::run is called, so it is actually faster to disable them entirely
@@ -36,9 +37,10 @@ HH_BTag::HH_BTag(const std::array<std::string, HH_BTag::n_models>& models)
 
 
     for(size_t n = 0; n < HH_BTag::n_models; ++n) {
-        nn_descs.at(n).graph.reset(tensorflow::loadMetaGraphDef(models.at(n)));
-        nn_descs.at(n).session = tensorflow::createSession(nn_descs.at(n).graph.get(), models.at(n), default_options);
-        if (models.at(n).find("v1") != std::string::npos) {
+        if (useMetaGraph) {
+            nn_descs.at(n).metaGraph.reset(tensorflow::loadMetaGraphDef(models.at(n)));
+            nn_descs.at(n).session = tensorflow::createSession(nn_descs.at(n).metaGraph.get(), models.at(n), default_options);
+            if (models.at(n).find("v1") != std::string::npos) {
                 nn_descs.at(n).input_layer = "serving_default_input:0";
             } else if (models.at(n).find("v2") != std::string::npos) {
                 nn_descs.at(n).input_layer = "serving_default_input_1:0";
@@ -47,8 +49,23 @@ HH_BTag::HH_BTag(const std::array<std::string, HH_BTag::n_models>& models)
             } else {
                 throw std::runtime_error("HH_BTag::HH_BTag: unknown model version");
             }
+            nn_descs.at(n).output_layer = "StatefulPartitionedCall:0";
 
-        nn_descs.at(n).output_layer = "StatefulPartitionedCall:0";
+        } else {
+            nn_descs.at(n).graph.reset(tensorflow::loadGraphDef(models.at(n)));
+            nn_descs.at(n).session = tensorflow::createSession(nn_descs.at(n).graph.get(), default_options);
+
+            tensorflow::CallableOptions call_opts;
+            call_opts.add_feed("MyInput:0");
+            call_opts.add_fetch("Identity:0");
+
+            call_opts.mutable_run_options()->set_inter_op_thread_pool(-1); // no multithreading
+
+            tensorflow::Session::CallableHandle& handle = nn_descs.at(n).callableHandle ;
+            tensorflow::Status s = nn_descs.at(n).session->MakeCallable(call_opts, &handle);
+            if (!s.ok())
+                throw std::runtime_error("HH_btag initalization failed");
+        }
     }
 }
 
@@ -83,8 +100,15 @@ std::vector<float> HH_BTag::GetScore(const std::vector<float>& jet_pt, const std
     }
     std::vector<tensorflow::Tensor> pred_vec;
     parity = parity % n_models;
-    tensorflow::run(nn_descs.at(parity).session, { { nn_descs.at(parity).input_layer, x } },
+    if (useMetaGraph_) {
+        tensorflow::run(nn_descs.at(parity).session, { { nn_descs.at(parity).input_layer, x } },
                     { nn_descs.at(parity).output_layer }, &pred_vec);
+    }
+    else {
+        tensorflow::Status s = nn_descs.at(parity).session->RunCallable(nn_descs.at(parity).callableHandle, {x}, &pred_vec, nullptr);
+        if (!s.ok())
+            throw std::runtime_error("HH_BTag inference failed"+s.ToString());
+    }
 
     std::vector<float> scores(jet_pt.size(), 0);
     for (size_t jet_index = 0; jet_index < n_jets_evt; ++jet_index) {
